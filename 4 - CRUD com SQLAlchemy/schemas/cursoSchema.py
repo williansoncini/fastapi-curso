@@ -5,7 +5,7 @@ class CursoSchema(BaseModelSC):
   id: Optional[int]
   titulo: str
   aulas: int
-  hotas: int
+  horas: int
   
   class Config:
     orm_mode=True
