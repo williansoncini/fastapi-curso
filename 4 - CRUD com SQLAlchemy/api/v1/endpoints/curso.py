@@ -18,7 +18,7 @@ async def post_curso(curso: CursoSchema, db: AsyncSession = Depends(get_session)
   
   return novo_curso
 
-@router.get('/', response_model=List[CursoModel])
+@router.get('/', response_model=List[CursoSchema])
 async def get_cursos(db: AsyncSession = Depends(get_session)):
   async with db as session:
     query = select(CursoModel)
@@ -32,19 +32,19 @@ async def get_curso(id: int, db: AsyncSession = Depends(get_session)):
   async with db as session:
     query = select(CursoModel).filter(CursoModel.id == id)
     result = await session.execute(query)
-    curso = result.scalars_one_or_none()
+    curso: CursoSchema = result.scalar_one_or_none()
     
     if curso:
       return curso
     raise HTTPException(detail='Curso não encontrado', status_code=status.HTTP_400_BAD_REQUEST)
   
   
-@router.put('/{id}', status_code=status.HTTP_202_ACCEPTED, response_model=CursoModel)
+@router.put('/{id}', status_code=status.HTTP_202_ACCEPTED, response_model=CursoSchema)
 async def put_curso(id: int, curso: CursoSchema, db: AsyncSession = Depends(get_session)):
   async with db as session:
     query = select(CursoModel).filter(CursoModel.id == id)
     result = await session.execute(query)
-    cursoUp: CursoSchema = result.scalars_one_or_none()
+    cursoUp: CursoSchema = result.scalar_one_or_none()
     
     if cursoUp:
       cursoUp.titulo = curso.titulo
@@ -62,7 +62,7 @@ async def delete_curso(id: int, db: AsyncSession = Depends(get_session)):
   async with db as session:
     query = select(CursoModel).filter(CursoModel.id == id)
     result = await session.execute(query)
-    curso: CursoSchema = result.scalars_one_or_none()
+    curso: CursoSchema = result.scalar_one_or_none()
     
     if curso:
       await session.delete(curso)
