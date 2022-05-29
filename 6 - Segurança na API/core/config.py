@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 class Settings(BaseSettings):
   API_V1_STR = '/api/v1'
-  DB_URL: str = "postgresql+asyncpg://admin:admin@172.20.196.57:5432/cursos"
+  DB_URL: str = "postgresql+asyncpg://admin:admin@172.29.47.175:5432/cursos"
   DBBaseModel = declarative_base()
   JWT_SECRET = "pQOaP5j6-fNdyimJhO6qc7bVl80HL3WOJtNZEAQP9AQ"
   """
