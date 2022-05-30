@@ -25,26 +25,25 @@ async def post_usuario(usuario:UsarioSchemaCreate, db: AsyncSession = Depends(ge
     senha=gerarHashSenha(usuario.senha),
     eh_admin=usuario.eh_admin
   )
-
   async with db as session:
     session.add(novo_usario)
     await session.commit()
     
     return novo_usario
   
-@router.get('/', response_model=List[UsuarioSchemaBase])
+@router.get('/', response_model=List[UsarioSchemaArtigo])
 async def get_usuarios(db:AsyncSession = Depends(get_session)):
   async with db as session:
     query = select(UsuarioModel)
-    result = session.execute(query)
-    usuarios: List[UsuarioSchemaBase] = result.scalars().unique().all()
+    result = await session.execute(query)
+    usuarios: List[UsarioSchemaArtigo] = result.scalars().unique().all()
     return usuarios
 
-@router.get('/{id}', response_model=UsuarioSchemaBase, status_code=status.HTTP_200_OK)
+@router.get('/{id}', response_model=UsarioSchemaArtigo, status_code=status.HTTP_200_OK)
 async def get_usuario(id: int, db: AsyncSession = Depends(get_session)):
   async with db as session:
     query = select(UsuarioModel).filter(UsuarioModel.id == id)
-    result = session.execute(query)
+    result = await session.execute(query)
     usuario = result.scalars().unique().one_or_none()
     
     if usuario:
@@ -53,20 +52,20 @@ async def get_usuario(id: int, db: AsyncSession = Depends(get_session)):
       raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Não encontrado')
 
 @router.put('/{id}', response_model=UsuarioSchemaBase, status_code=status.HTTP_202_ACCEPTED)
-async def put_usuario(id: int, usuario: UsarioSchemaCreate, db: AsyncSession = Depends(get_session)):
+async def put_usuario(id: int, usuario: UsuarioSchemaUp, db: AsyncSession = Depends(get_session)):
   async with db as session:
     query = select(UsuarioModel).filter(UsuarioModel.id == id)
-    result = session.execute(query)
+    result = await session.execute(query)
     usuarioUp: UsuarioSchemaBase = result.scalars().unique().one_or_none()
     
     if usuarioUp:
-      if usuario.nome != usuarioUp.nome:
+      if usuario.nome:
         usuarioUp.nome = usuario.nome
-      if usuario.email != usuarioUp.email:
+      if usuario.email:
         usuarioUp.email = usuario.email
-      if usuario.eh_admin != usuarioUp.eh_admin:
+      if usuario.eh_admin:
         usuarioUp.eh_admin = usuario.eh_admin
-      if usuarioUp.senha:
+      if usuario.senha:
         usuarioUp.senha = gerarHashSenha(usuario.senha)
       
       await session.commit()
@@ -78,7 +77,7 @@ async def put_usuario(id: int, usuario: UsarioSchemaCreate, db: AsyncSession = D
 async def delete_usuario(id: int, db: AsyncSession = Depends(get_session)):
   async with db as session:
     query = select(UsuarioModel).filter(UsuarioModel.id == id)
-    result = session.execute(query)
+    result = await session.execute(query)
     usuario = result.scalars().unique().one_or_none()
     
     if usuario:

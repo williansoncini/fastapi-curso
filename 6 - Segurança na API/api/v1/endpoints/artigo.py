@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from models.artigo_model import ArtigoModel
 from models.usuario_model import UsuarioModel
-from schemas.artigosSchema import ArtigoSchema
+from schemas.artigosSchema import ArtigoSchema, ArtigoSchemaUp
 from core.deps import get_current_user, get_session
 
 router = APIRouter()
@@ -28,7 +28,7 @@ async def post_artigo(artigo: ArtigoSchema,
 async def get_artigos(db: AsyncSession = Depends(get_session)):
   async with db as session:
     query = select(ArtigoModel)
-    result = session.execute(query)
+    result = await session.execute(query)
     artigos: List[ArtigoModel] = result.scalars().unique().all()
     
     return artigos
@@ -37,7 +37,7 @@ async def get_artigos(db: AsyncSession = Depends(get_session)):
 async def get_artigo(id: int, db: AsyncSession = Depends(get_session)):
   async with db as session:
     query = select(ArtigoModel).filter(ArtigoModel.id == id)
-    result = session.execute(query)
+    result = await session.execute(query)
     artigo: ArtigoModel = result.scalars().unique().one_or_none()
     
     if artigo:
@@ -47,12 +47,12 @@ async def get_artigo(id: int, db: AsyncSession = Depends(get_session)):
       
 @router.put('/{id}', status_code=status.HTTP_202_ACCEPTED, response_model=ArtigoSchema)
 async def put_artigo(id: int, 
-                     artigo: ArtigoSchema, 
+                     artigo: ArtigoSchemaUp, 
                      usuario_logado: UsuarioModel = Depends(get_current_user), 
                      db: AsyncSession = Depends(get_session)):
   async with db as session:
     query = select(ArtigoModel).filter(ArtigoModel.id == id)
-    result = session.execute(query)
+    result = await session.execute(query)
     artigoUp: ArtigoModel = result.scalars().unique().one_or_none()
     
     if artigoUp:
@@ -77,7 +77,7 @@ async def delete_artigo(id: int,
                         usuario_logado: UsuarioModel = Depends(get_current_user), ):
   async with db as session:
     query = select(ArtigoModel).filter(ArtigoModel.id == id).filter(ArtigoModel.usuario_id == usuario_logado.id)
-    result = session.execute(query)
+    result = await session.execute(query)
     artigo: ArtigoModel = result.scalars().unique().one_or_none()
     
     if artigo:
